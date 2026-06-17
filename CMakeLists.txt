@@ -44,11 +44,17 @@ foreach(VERSION_PATH ${VERSIONS})
     message(STATUS "Adding game support from ${VERSION_FILE}...")
 
     include(${VERSION_PATH})
-    
-    if(DEFINED RESOLVED_TARGET_QUICK_RETRY) 
-        set(HAS_RESOLVED_TARGET_QUICK_RETRY 1) 
-    else() 
-        set(HAS_RESOLVED_TARGET_QUICK_RETRY 0) 
+
+    if(DEFINED RESOLVED_TARGET_QUICK_RETRY)
+        set(HAS_RESOLVED_TARGET_QUICK_RETRY 1)
+    else()
+        set(HAS_RESOLVED_TARGET_QUICK_RETRY 0)
+    endif()
+
+    if(DEFINED RESOLVED_WIDE_GAUGE_VALUES)
+        set(HAS_RESOLVED_WIDE_GAUGE_VALUES 1)
+    else()
+        set(HAS_RESOLVED_WIDE_GAUGE_VALUES 0)
     endif()
 
     set(VERSION_FILENAME "macros/version.${EXPECTED_BM2DX_PRODUCT_VERSION}.cc")

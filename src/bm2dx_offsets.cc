@@ -54,6 +54,8 @@ namespace offsets
     std::uintptr_t target_return_from_result = 0;
     std::uintptr_t target_quick_retry = 0;
 
+    bool wide_gauge_values = false;
+
     void resolve(HMODULE base)
     {
         auto const start = reinterpret_cast<std::uintptr_t>(base);

@@ -24,7 +24,7 @@ enum gauge_types
 
 struct chart_judgement_t
 {
-    std::uint16_t values[4];
+    std::uint32_t values[4];
 };
 
 struct COptionGameData;

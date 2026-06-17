@@ -2,6 +2,7 @@
 #include "../../src/bm2dx_offsets.h"
 
 #cmakedefine01 HAS_RESOLVED_TARGET_QUICK_RETRY
+#cmakedefine01 HAS_RESOLVED_WIDE_GAUGE_VALUES
 
 struct bm2dx_impl_@EXPECTED_BM2DX_PRODUCT_VERSION@_@EXPECTED_BM2DX_PRODUCT_TYPE@ final: binary_info
 {
@@ -61,6 +62,10 @@ struct bm2dx_impl_@EXPECTED_BM2DX_PRODUCT_VERSION@_@EXPECTED_BM2DX_PRODUCT_TYPE@
         offsets::target_return_from_result = (base + @RESOLVED_TARGET_RETURN_FROM_RESULT@);
 #if HAS_RESOLVED_TARGET_QUICK_RETRY
         offsets::target_quick_retry = (base + @RESOLVED_TARGET_QUICK_RETRY@);
+#endif
+
+#if HAS_RESOLVED_WIDE_GAUGE_VALUES
+        offsets::wide_gauge_values = (@RESOLVED_WIDE_GAUGE_VALUES@ == 1);
 #endif
     }
 };

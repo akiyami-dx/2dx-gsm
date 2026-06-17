@@ -59,4 +59,6 @@ namespace offsets
     extern std::uintptr_t target_result_graph_render;
     extern std::uintptr_t target_return_from_result;
     extern std::uintptr_t target_quick_retry;
+
+    extern bool wide_gauge_values;
 }
