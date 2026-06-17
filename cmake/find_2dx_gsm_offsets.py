@@ -75,7 +75,11 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
             find_pattern("66 83 F9 64 7D 46")
             find_pattern("48 8B C8 E8", pos(), 3)
         except ValueError:
-            find_pattern("E8 ? ? ? ? EB ? B8 ? ? ? ? 66 89 03")
+            try:
+                find_pattern("E8 ? ? ? ? EB ? B8 ? ? ? ? 66 89 03")
+            except AttributeError:
+                find_pattern("41 B0 01 8B D5 48 8B C8 E8 ? ? ? ? EB")
+                mm.seek(pos() + 8)
         addresses["RESOLVED_DEATH_DEFYING_PATCH"] = pe.get_rva_from_offset(pos())
 
         # RESOLVED_GAUGE_RENDER_FN_BEGIN
@@ -107,8 +111,11 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
         addresses["RESOLVED_GET_GAUGE_FN"] = pe.get_rva_from_offset(pos())
 
         # RESOLVED_SET_GAUGE_FN
-        find_pattern("E8 ? ? ? ? 44 8B C5 41 F7 C6")
-        mm.seek(pe.get_offset_from_rva(dereference(1, 5)))
+        try:
+            find_pattern("E8 ? ? ? ? 44 8B C5 41 F7 C6")
+            mm.seek(pe.get_offset_from_rva(dereference(1, 5)))
+        except AttributeError:
+            find_pattern("40 53 48 83 EC ? 41 8B D8 45 8B C1 E8 ? ? ? ? 89 58 40")
         addresses["RESOLVED_SET_GAUGE_FN"] = pe.get_rva_from_offset(pos())
 
         # RESOLVED_IS_DAN_PRACTICE_FN
@@ -134,10 +141,17 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
 
         # RESOLVED_P1_GROOVE_GAUGE_PTR
         # RESOLVED_P2_GROOVE_GAUGE_PTR
-        find_pattern("48 8D 05 ? ? ? ? 0F BF 14 48")
+        try:
+            find_pattern("48 8D 05 ? ? ? ? 0F BF 14 48")
+            gauge_value_size = 2
+        except AttributeError:
+            find_pattern("48 63 C1 48 8D 0C 80 48 8D 05 ? ? ? ? 8B 04 88")
+            mm.seek(pos() + 7)
+            gauge_value_size = 4
+        wide_gauge_values = 1 if gauge_value_size == 4 else 0
         address = dereference(3, 7)
         addresses["RESOLVED_P1_GROOVE_GAUGE_PTR"] = address
-        addresses["RESOLVED_P2_GROOVE_GAUGE_PTR"] = address + 0xA
+        addresses["RESOLVED_P2_GROOVE_GAUGE_PTR"] = address + (5 * gauge_value_size)
 
         # RESOLVED_P1_RESULT_GRAPH_PTR
         # RESOLVED_P2_RESULT_GRAPH_PTR
@@ -149,8 +163,8 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
 
         # RESOLVED_P1_CHART_JUDGEMENT_PTR
         # RESOLVED_P2_CHART_JUDGEMENT_PTR
-        addresses["RESOLVED_P1_CHART_JUDGEMENT_PTR"] = addresses["RESOLVED_P1_GROOVE_GAUGE_PTR"] + 0x2
-        addresses["RESOLVED_P2_CHART_JUDGEMENT_PTR"] = addresses["RESOLVED_P1_GROOVE_GAUGE_PTR"] + 0xC
+        addresses["RESOLVED_P1_CHART_JUDGEMENT_PTR"] = addresses["RESOLVED_P1_GROOVE_GAUGE_PTR"] + gauge_value_size
+        addresses["RESOLVED_P2_CHART_JUDGEMENT_PTR"] = addresses["RESOLVED_P1_GROOVE_GAUGE_PTR"] + (6 * gauge_value_size)
 
         # RESOLVED_P1_GAUGE_OPTION_PTR
         # RESOLVED_P2_GAUGE_OPTION_PTR
@@ -171,7 +185,10 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
         addresses["RESOLVED_P2_DEAD_MEASURE_PTR"] = address + 0x4
 
         # RESOLVED_CALCULATE_INDIVIDUAL_CHART_JUDGE_VALUE
-        find_pattern("E8 ? ? ? ? 66 89 47 F6")
+        try:
+            find_pattern("E8 ? ? ? ? 66 89 47 F6")
+        except AttributeError:
+            find_pattern("E8 ? ? ? ? 89 47 EC B9 01 00 00 00")
         addresses["RESOLVED_CALCULATE_INDIVIDUAL_CHART_JUDGE_VALUE"] = dereference(1, 5)
 
         # RESOLVED_TARGET_CALCULATE_CHART_JUDGE
@@ -208,6 +225,10 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
             # RESOLVED_TARGET_QUICK_RETRY
             find_pattern("E8 ? ? ? ? FF 46 ? 48 8B 9C 24")
             addresses["RESOLVED_TARGET_QUICK_RETRY"] = dereference(1, 5)
+
+        # RESOLVED_WIDE_GAUGE_VALUES
+        if wide_gauge_values == 1:
+            addresses["RESOLVED_WIDE_GAUGE_VALUES"] = wide_gauge_values
 
         for title, address in addresses.items():
             output.append(f"set({title:<50} 0x{address:08x})")
