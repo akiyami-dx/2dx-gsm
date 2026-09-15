@@ -106,8 +106,11 @@ for dll in pathlib.Path(".").glob("bm2dx*.dll"):
         addresses["RESOLVED_OPTION_DATA_PTR"] = dereference(3, 7)
 
         # RESOLVED_GET_GAUGE_FN
-        find_pattern("E8 ? ? ? ? 44 8B E8 48 8D 85")
-        mm.seek(pe.get_offset_from_rva(dereference(1, 5)))
+        try:
+            find_pattern("E8 ? ? ? ? 44 8B E8 48 8D 85")
+            mm.seek(pe.get_offset_from_rva(dereference(1, 5)))
+        except AttributeError:
+            find_pattern("48 83 EC ? E8 ? ? ? ? 8B 40 40 48 83 C4 ? C3")
         addresses["RESOLVED_GET_GAUGE_FN"] = pe.get_rva_from_offset(pos())
 
         # RESOLVED_SET_GAUGE_FN
