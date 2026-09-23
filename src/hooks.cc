@@ -45,6 +45,9 @@ std::unordered_map<std::string_view, std::string_view> texture_remap = {
     { "playm_gauge_normal_dot", "playm_gauge_easy_dot_low" },
     { "playm_gauge_hard_dot",   "playm_gauge_easy_dot_high" },
 };
+std::unordered_map<std::string_view, std::string_view> assisted_easy_texture_remap = {
+    { "playm_gauge_normal_dot", "playm_gauge_aeasy_dot" },
+};
 
 // defaults
 std::int8_t gauge_priorities[] = {  2,               0,      1,      3,         4};
@@ -594,13 +597,17 @@ void hijack_gauge_textures(safetyhook::Context& ctx)
     else
         type = p2_gauge_type.get();
 
-    // all other gauges are unique, so we only need to apply to easy
-    if (type != GAUGE_EASY)
+    std::unordered_map<std::string_view, std::string_view>* remap = nullptr;
+
+    if (type == GAUGE_EASY)
+        remap = &texture_remap;
+    else if (type == GAUGE_ASSISTED_EASY)
+        remap = &assisted_easy_texture_remap;
+    else
         return;
 
-    // swap address to point to replacement texture
-    if (!texture_remap.contains(texture))
+    if (!remap->contains(texture))   // same operation, just on whichever map was selected
         return;
-
-    ctx.rdx = reinterpret_cast<std::uintptr_t>(texture_remap.at(texture).data());
+    
+    ctx.rdx = reinterpret_cast<std::uintptr_t>(remap->at(texture).data());
 }
